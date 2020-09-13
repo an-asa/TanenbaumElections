@@ -8,6 +8,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import static javafx.stage.Modality.APPLICATION_MODAL;
+
 public class setupController {
 
     public TextField PriorityInput;
@@ -27,7 +29,8 @@ public class setupController {
             runController controller = fxmlLoader.getController();
             controller.nodeInitialization(priority,ip);
             Stage stage = new Stage();
-            stage.setTitle("Konfiguracja węzła");
+            stage.initModality(APPLICATION_MODAL);
+            stage.setTitle(java.net.InetAddress.getLocalHost().toString());
             stage.setScene(new Scene(root));
             stage.show();
         } catch(Exception e) {
