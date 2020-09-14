@@ -25,19 +25,19 @@ public class runController implements RMIInterface {
     @Override
     public void sendElect(List<String[]> host) throws RemoteException {
 
+        electButton.setDisable(true);
         boolean elected = false;
-
         String message = "Otrzymano sygnał ELECT z hostami: \n\n";
         message += "Priorytet\tIP\n";
 
         for (String[] record : host) {
-            if(record[0] == this.priority) elected = true;
+            if (record[0] == this.priority) elected = true;
             message += record[0] + "\t" + record[1] + "\n";
         }
 
         message += "\n";
 
-        if(elected){
+        if (elected) {
 
             message += "Sygnał przeszedł przez pierścień. Rozpoczęto elekcję.";
             logEvent(message);
@@ -54,15 +54,15 @@ public class runController implements RMIInterface {
             if (rmi != null) {
                 try {
                     List<String[]> newHost = new LinkedList<String[]>();
-                    newHost.add(new String[] {priority, java.net.InetAddress.getLocalHost().toString()});
+                    newHost.add(new String[]{priority, java.net.InetAddress.getLocalHost().toString()});
                     rmi.sendCoordinator(newHost);
 
                     message = null;
                     message += "Wysłano sygnał COORDINATOR o treści: \n\n";
                     message += "Priorytet\tIP\n";
                     for (String[] record : newHost) {
-                        if(record[0] == this.priority)
-                        message += record[0] + "\t" + record[1] + "\n";
+                        if (record[0] == this.priority)
+                            message += record[0] + "\t" + record[1] + "\n";
                     }
                     message += "do hosta" + ip + "\n";
                     logEvent(message);
@@ -71,7 +71,7 @@ public class runController implements RMIInterface {
                 }
             }
 
-        }else{
+        } else {
 
             message += "Dodano dane węzła do wiadomości w celu jej dalszego przekazania.";
             logEvent(message);
@@ -88,14 +88,14 @@ public class runController implements RMIInterface {
             if (rmi != null) {
                 try {
                     List<String[]> newHost = host;
-                    newHost.add(new String[] {priority, java.net.InetAddress.getLocalHost().toString()});
+                    newHost.add(new String[]{priority, java.net.InetAddress.getLocalHost().getHostAddress()});
                     rmi.sendElect(newHost);
 
                     message = null;
                     message += "Wysłano sygnał ELECT o treści: \n\n";
                     message += "Priorytet\tIP\n";
                     for (String[] record : newHost) {
-                        if(record[0] == this.priority);
+                        if (record[0] == this.priority) ;
                         message += record[0] + "\t" + record[1] + "\n";
                     }
                     message += "do hosta" + ip + "\n";
@@ -111,19 +111,20 @@ public class runController implements RMIInterface {
     @Override
     public void sendCoordinator(List<String[]> host) throws RemoteException {
 
+        electButton.setDisable(true);
         int maxPriority = 0;
-        String[] coordinatorRecord = new String[] {"",""};
+        String[] coordinatorRecord = new String[]{"", ""};
         String message = "Otrzymano sygnał COORDINATOR z hostami: \n\n";
 
         for (String[] record : host) {
             message += record[0] + "\t" + record[1] + "\n";
-            if(Integer.parseInt(record[0])>maxPriority){
+            if (Integer.parseInt(record[0]) > maxPriority) {
                 maxPriority = Integer.parseInt(record[0]);
                 coordinatorRecord = record;
             }
         }
 
-        if(coordinatorRecord != this.coordinator){
+        if (coordinatorRecord != this.coordinator) {
             message += "\nZ rekordów wybrano koordynatora: " + coordinatorRecord[0] + "\t" + coordinatorRecord[1] + "\n";
             logEvent(message);
             RMIInterface rmi = null;
@@ -144,7 +145,7 @@ public class runController implements RMIInterface {
                     message += "Wysłano sygnał COORDINATOR o treści: \n\n";
                     message += "Priorytet\tIP\n";
                     for (String[] record : host) {
-                        if(record[0] == this.priority);
+                        if (record[0] == this.priority) ;
                         message += record[0] + "\t" + record[1] + "\n";
                     }
                     message += "do hosta" + ip + "\n";
@@ -153,21 +154,21 @@ public class runController implements RMIInterface {
                     e.printStackTrace();
                 }
             }
-        }else{
+        } else {
             message += "\nWszystkie węzły przyjęły wybranego koordynatora: " + coordinatorRecord[0] + "\t" + coordinatorRecord[1] + "\n";
             logEvent(message);
         }
 
     }
 
-    private void logEvent(String log){
+    private void logEvent(String log) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
         String logText = "> [" + dtf.format(now) + "] " + log + "\n";
         logField.setText(logText);
     }
 
-    public void nodeInitialization(String prority, String ip){
+    public void nodeInitialization(String prority, String ip) {
         logEvent("Zainicjalizowano węzeł o nr priorytetu " + prority + " o następniku " + ip);
         this.priority = prority;
         this.ip = ip;
@@ -175,6 +176,34 @@ public class runController implements RMIInterface {
 
     public void electButtonClicked(ActionEvent actionEvent) throws RemoteException {
         electButton.setDisable(true);
+        RMIInterface rmi = null;
+        List<String[]> host = new LinkedList<String[]>();
+        host.add(new String[] {priority,ip});
+
+        try {
+            Registry registry = LocateRegistry.getRegistry(ip, 1099);
+            rmi = (RMIInterface) registry.lookup("server");
+            System.out.println("Connected to Server");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (rmi != null) {
+            try {
+                rmi.sendElect(host);
+
+                String message = "Wysłano sygnał ELECT o treści: \n\n";
+                message += "Priorytet\tIP\n";
+                for (String[] record : host) {
+                    if (record[0] == this.priority) ;
+                    message += record[0] + "\t" + record[1] + "\n";
+                }
+                message += "do hosta" + ip + "\n";
+                logEvent(message);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @FXML
@@ -187,7 +216,7 @@ public class runController implements RMIInterface {
             e.printStackTrace();
         }
         runController serverObject = new runController();
-        System.out.println("Waiting...");
+        System.out.println("RMI server online");
         try {
             reg.rebind("server", UnicastRemoteObject.exportObject(serverObject, 0));
         } catch (Exception e) {

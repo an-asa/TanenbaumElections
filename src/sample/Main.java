@@ -11,7 +11,7 @@ import java.rmi.RemoteException;
 public class Main extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("setupMenu.fxml"));
         primaryStage.setTitle("Konfiguracja węzła");
         primaryStage.setScene(new Scene(root));
