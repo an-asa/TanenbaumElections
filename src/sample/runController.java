@@ -21,11 +21,20 @@ public class runController implements RMIInterface {
     public Button electButton;
     public TextArea logField;
     public String[] coordinator;
+    RMIInterface rmi = null;
 
     @Override
-    public void sendElect(List<String[]> host) throws RemoteException {
+    public void sendElect(List<String[]> host) throws RemoteException, InterruptedException {
+        receiveElect(host);
+    }
 
-        electButton.setDisable(true);
+    @Override
+    public void sendCoordinator(List<String[]> host) throws RemoteException, InterruptedException {
+        sendElect(host);
+    }
+
+    public void receiveElect(List<String[]> host) throws RemoteException, InterruptedException {
+
         boolean elected = false;
         String message = "Otrzymano sygnał ELECT z hostami: \n\n";
         message += "Priorytet\tIP\n";
@@ -41,15 +50,6 @@ public class runController implements RMIInterface {
 
             message += "Sygnał przeszedł przez pierścień. Rozpoczęto elekcję.";
             logEvent(message);
-            RMIInterface rmi = null;
-
-            try {
-                Registry registry = LocateRegistry.getRegistry(ip, 1099);
-                rmi = (RMIInterface) registry.lookup("server");
-                System.out.println("Connected to Server");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
             if (rmi != null) {
                 try {
@@ -64,7 +64,7 @@ public class runController implements RMIInterface {
                         if (record[0] == this.priority)
                             message += record[0] + "\t" + record[1] + "\n";
                     }
-                    message += "do hosta" + ip + "\n";
+                    message += "do hosta " + ip + "\n";
                     logEvent(message);
                 } catch (RemoteException | UnknownHostException e) {
                     e.printStackTrace();
@@ -80,7 +80,6 @@ public class runController implements RMIInterface {
             try {
                 Registry registry = LocateRegistry.getRegistry(ip, 1099);
                 rmi = (RMIInterface) registry.lookup("server");
-                System.out.println("Connected to Server");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -98,7 +97,7 @@ public class runController implements RMIInterface {
                         if (record[0] == this.priority) ;
                         message += record[0] + "\t" + record[1] + "\n";
                     }
-                    message += "do hosta" + ip + "\n";
+                    message += "do hosta " + ip + "\n";
                     logEvent(message);
                 } catch (RemoteException | UnknownHostException e) {
                     e.printStackTrace();
@@ -108,10 +107,8 @@ public class runController implements RMIInterface {
 
     }
 
-    @Override
-    public void sendCoordinator(List<String[]> host) throws RemoteException {
+    public void receiveCoordinator(List<String[]> host) throws RemoteException, InterruptedException {
 
-        electButton.setDisable(true);
         int maxPriority = 0;
         String[] coordinatorRecord = new String[]{"", ""};
         String message = "Otrzymano sygnał COORDINATOR z hostami: \n\n";
@@ -127,15 +124,6 @@ public class runController implements RMIInterface {
         if (coordinatorRecord != this.coordinator) {
             message += "\nZ rekordów wybrano koordynatora: " + coordinatorRecord[0] + "\t" + coordinatorRecord[1] + "\n";
             logEvent(message);
-            RMIInterface rmi = null;
-
-            try {
-                Registry registry = LocateRegistry.getRegistry(ip, 1099);
-                rmi = (RMIInterface) registry.lookup("server");
-                System.out.println("Connected to Server");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
             if (rmi != null) {
                 try {
@@ -148,7 +136,7 @@ public class runController implements RMIInterface {
                         if (record[0] == this.priority) ;
                         message += record[0] + "\t" + record[1] + "\n";
                     }
-                    message += "do hosta" + ip + "\n";
+                    message += "do hosta " + ip + "\n";
                     logEvent(message);
                 } catch (RemoteException e) {
                     e.printStackTrace();
@@ -161,32 +149,21 @@ public class runController implements RMIInterface {
 
     }
 
-    private void logEvent(String log) {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
-        LocalDateTime now = LocalDateTime.now();
-        String logText = "> [" + dtf.format(now) + "] " + log + "\n";
-        logField.setText(logText);
+    private void logEvent(String log) throws InterruptedException {
+        String logText = ">" + log + "\n";
+        System.out.println(logText);
+        Thread.sleep(1000);
     }
 
-    public void nodeInitialization(String prority, String ip) {
+    public void nodeInitialization(String prority, String ip) throws InterruptedException {
         logEvent("Zainicjalizowano węzeł o nr priorytetu " + prority + " o następniku " + ip);
         this.priority = prority;
         this.ip = ip;
     }
 
     public void electButtonClicked(ActionEvent actionEvent) throws RemoteException {
-        electButton.setDisable(true);
-        RMIInterface rmi = null;
         List<String[]> host = new LinkedList<String[]>();
         host.add(new String[] {priority,ip});
-
-        try {
-            Registry registry = LocateRegistry.getRegistry(ip, 1099);
-            rmi = (RMIInterface) registry.lookup("server");
-            System.out.println("Connected to Server");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         if (rmi != null) {
             try {
@@ -198,30 +175,21 @@ public class runController implements RMIInterface {
                     if (record[0] == this.priority) ;
                     message += record[0] + "\t" + record[1] + "\n";
                 }
-                message += "do hosta" + ip + "\n";
+                message += "do hosta " + ip + "\n";
                 logEvent(message);
-            } catch (RemoteException e) {
+            } catch (RemoteException | InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    @FXML
     public void initialize() {
-        Registry reg = null;
         try {
-            reg = LocateRegistry.createRegistry(1099);
+            Registry registry = LocateRegistry.getRegistry(ip, 1099);
+            this.rmi = (RMIInterface) registry.lookup("server");
         } catch (Exception e) {
-            System.out.println("ERROR: Could not create the registry.");
-            e.printStackTrace();
-        }
-        runController serverObject = new runController();
-        System.out.println("RMI server online");
-        try {
-            reg.rebind("server", UnicastRemoteObject.exportObject(serverObject, 0));
-        } catch (Exception e) {
-            System.out.println("ERROR: Failed to register the server object.");
             e.printStackTrace();
         }
     }
+
 }
