@@ -167,8 +167,6 @@ public class runController implements RMIInterface {
 
         if (rmi != null) {
             try {
-                rmi.sendElect(host);
-
                 String message = "Wysłano sygnał ELECT o treści: \n\n";
                 message += "Priorytet\tIP\n";
                 for (String[] record : host) {
@@ -177,6 +175,7 @@ public class runController implements RMIInterface {
                 }
                 message += "do hosta " + ip + "\n";
                 logEvent(message);
+                rmi.sendElect(host);
             } catch (RemoteException | InterruptedException e) {
                 e.printStackTrace();
             }

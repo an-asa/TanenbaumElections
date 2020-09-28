@@ -1,13 +1,15 @@
 package sample;
 
+import java.net.UnknownHostException;
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
 public interface RMIInterface extends Remote {
 
-    public void sendElect(List<String[]> host) throws RemoteException, InterruptedException;
+    void sendElect(List<String[]> host) throws RemoteException, InterruptedException, UnknownHostException, NotBoundException;
 
-    public void sendCoordinator(List<String[]> host) throws RemoteException, InterruptedException;
+    void sendCoordinator(List<String[]> host) throws RemoteException, InterruptedException, UnknownHostException, NotBoundException;
 
 }
