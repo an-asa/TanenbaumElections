@@ -18,7 +18,6 @@ public class Main implements RMIInterface {
     private final int priority = 1;
 
     private int coordinatorPriority;
-    private List<String[]> inithosts;
 
     public static void main(String[] args) throws RemoteException, NotBoundException, UnknownHostException, InterruptedException {
 
@@ -42,8 +41,8 @@ public class Main implements RMIInterface {
             e.printStackTrace();
         }
 
-        List<String[]> host = new LinkedList<>();
-        host.add(new String[]{Integer.toString(1), "192.168.1.101"});
+        List<Node> host = new LinkedList<>();
+        host.add(new Node(1, "192.168.1.101"));
 
         Registry registry = LocateRegistry.getRegistry(nextIp, 1099);
         rmi = (RMIInterface) registry.lookup("server");
@@ -51,24 +50,11 @@ public class Main implements RMIInterface {
     }
 
     @Override
-    public void sendElect(List<String[]> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
+    public void sendElect(List<Node> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
         receiveElect(host);
     }
 
-//    public void receiveElect(List<String[]> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
-//        System.out.println("test 1");
-//        String message = "";
-//        for (String[] record : host) {
-//            message += record[0] + "\t" + record[1] + "\n";
-//        }
-//        System.out.println(message);
-//        host.add(new String[]{Integer.toString(1), "192.168.1.100"});
-//        Registry registry = LocateRegistry.getRegistry(nextIp, 1099);
-//        rmi = (RMIInterface) registry.lookup("server");
-//        rmi.sendElect(host);
-//    }
-
-    public void receiveElect(List<String[]> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
+    public void receiveElect(List<Node> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
 
         boolean elected = false;
 
@@ -78,10 +64,10 @@ public class Main implements RMIInterface {
         System.out.print(message);
         message="";
 
-        for (String[] record : host) {
-            if (record[0].equals(Integer.toString(priority))) elected = true;
+        for (Node record : host) {
+            if (record.priority==priority) elected = true;
 
-            message += record[0] + "\t" + record[1] + "\n";
+            message += record.priority + "\t" + record.ip + "\n";
 
         }
 
@@ -95,8 +81,8 @@ public class Main implements RMIInterface {
             message += "Wysyłam sygnał COORDINATOR o treści: \n\n";
             message += "Priorytet\tIP\n";
 
-            for (String[] record : host) {
-                if (record[0] == Integer.toString(priority)) message += record[0] + "\t" + record[1] + "\n";
+            for (Node record : host) {
+                message += record.priority + "\t" + record.ip+ "\n";
             }
 
             message += "\ndo hosta " + nextIp + "\n";
@@ -113,15 +99,14 @@ public class Main implements RMIInterface {
 
             message += "\nDodano dane węzła do wiadomości w celu jej dalszego przekazania.\n\n";
 
-            List<String[]> newHost = host;
-            newHost.add(new String[]{Integer.toString(priority), java.net.InetAddress.getLocalHost().getHostAddress()});
+            List<Node> newHost = host;
+            newHost.add(new Node(priority, java.net.InetAddress.getLocalHost().getHostAddress()));
 
             message += "Wysłano sygnał ELECT o treści: \n\n";
             message += "Priorytet\tIP\n";
 
-            for (String[] record : newHost) {
-                if (record[0] == Integer.toString(priority)) ;
-                message += record[0] + "\t" + record[1] + "\n";
+            for (Node record : newHost) {
+                message += record.priority + "\t" + record.ip + "\n";
             }
 
             message += "\ndo hosta " + nextIp + "\n";
@@ -136,38 +121,39 @@ public class Main implements RMIInterface {
     }
 
     @Override
-    public void sendCoordinator(List<String[]> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
+    public void sendCoordinator(List<Node> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
         receiveCoordinator(host);
     }
 
-    public void receiveCoordinator(List<String[]> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
+    public void receiveCoordinator(List<Node> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
 
-        String[] coordinatorRecord = new String[]{"0", ""};
+        Node coordinatorRecord = new Node(0,"");
 
         String message = "Otrzymano sygnał COORDINATOR z hostami: \n\n";
         message += "Priorytet\tIP\n";
 
-        for (String[] record : host) {
+        for (Node record : host) {
 
-            message += record[0] + "\t" + record[1] + "\n";
+            message += record.priority + "\t" + record.ip + "\n";
 
-            if (Integer.parseInt(record[0]) > Integer.parseInt(coordinatorRecord[0])){
-                coordinatorRecord = new String[]{record[0], record[1]};
+            if (record.priority > coordinatorRecord.priority){
+                coordinatorRecord.priority = record.priority;
+                coordinatorRecord.ip = record.ip;
             }
         }
 
-        if (Integer.parseInt(coordinatorRecord[0]) != coordinatorPriority) {
+        if (coordinatorRecord.priority != coordinatorPriority) {
 
-            message += "\nZ rekordów wybrano koordynatora: " + coordinatorRecord[0] + "\t" + coordinatorRecord[1] + "\n";
+            message += "\nZ rekordów wybrano koordynatora: " + coordinatorRecord.priority + "\t" + coordinatorRecord.ip + "\n";
 
-            coordinatorPriority = Integer.parseInt(coordinatorRecord[0]);
+            coordinatorPriority = coordinatorRecord.priority;
 
             message += "Wysyłam sygnał COORDINATOR o treści: \n\n";
             message += "Priorytet\tIP\n";
 
-            for (String[] record : host) {
+            for (Node record : host) {
 
-                message += record[0] + "\t" + record[1] + "\n";
+                message += record.priority + "\t" + record.ip + "\n";
 
             }
 
@@ -182,7 +168,7 @@ public class Main implements RMIInterface {
         }
         else {
 
-            message += "\nWszystkie węzły przyjęły wybranego koordynatora: " + coordinatorRecord[0] + "\t" + coordinatorRecord[1] + "\n";
+            message += "\nWszystkie węzły przyjęły wybranego koordynatora: " + coordinatorRecord.priority + "\t" + coordinatorRecord.ip + "\n";
             System.out.println(message);
 
         }

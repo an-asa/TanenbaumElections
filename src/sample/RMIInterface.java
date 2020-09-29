@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface RMIInterface extends Remote {
 
-    void sendElect(List<String[]> host) throws RemoteException, InterruptedException, UnknownHostException, NotBoundException;
+    void sendElect(List<Node> host) throws RemoteException, InterruptedException, UnknownHostException, NotBoundException;
 
-    void sendCoordinator(List<String[]> host) throws RemoteException, InterruptedException, UnknownHostException, NotBoundException;
+    void sendCoordinator(List<Node> host) throws RemoteException, InterruptedException, UnknownHostException, NotBoundException;
 
 }
