@@ -42,6 +42,10 @@ public class Main implements RMIInterface {
 
     @Override
     public void sendElect(List<String[]> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
+        receiveElect(host);
+    }
+
+    public void receiveElect(List<String[]> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
 
         boolean elected = false;
 
@@ -96,6 +100,10 @@ public class Main implements RMIInterface {
 
     @Override
     public void sendCoordinator(List<String[]> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
+        receiveCoordinator(host);
+    }
+
+    public void receiveCoordinator(List<String[]> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
 
         int maxPriority = 0;
         String[] coordinatorRecord = new String[]{"", ""};
