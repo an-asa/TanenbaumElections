@@ -20,13 +20,14 @@ import java.util.*;
 
 public class ConfigWindowController implements ConfigInterface {
 
-    private static ConfigWindowController serverObject = null;
+    private static ConfigWindowController serverObject;
     public Button fileChooserButton;
     public Button launchButton;
     public TextField timeoutTextField;
     public File chosenfile = null;
     public int timeout = 0;
     public PriorityQueue<Node> hostQueue = new PriorityQueue<Node>(Comparator.comparingInt(a -> a.priority));
+    public ArrayList<Node> hostList;
 
     public void fileChooserButton_onClicked(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
@@ -66,6 +67,8 @@ public class ConfigWindowController implements ConfigInterface {
         }
 
         serverObject = new ConfigWindowController();
+        serverObject.timeout = timeout;
+        serverObject.hostQueue = hostQueue;
         System.out.println("RMI config server online at ");
         System.out.println(java.net.InetAddress.getLocalHost().getHostAddress() + "\n");
         System.out.println("Wczytane węzły:");
