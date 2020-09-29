@@ -11,8 +11,8 @@ import java.util.PriorityQueue;
 
 public interface SignalInterface extends Remote {
 
-    void sendElect(PriorityQueue<Node> host) throws RemoteException, InterruptedException, UnknownHostException, NotBoundException;
+    void sendElect(List<Node> host) throws RemoteException, InterruptedException, UnknownHostException, NotBoundException;
 
-    void sendCoordinator(PriorityQueue<Node> host) throws RemoteException, InterruptedException, UnknownHostException, NotBoundException;
+    void sendCoordinator(List<Node> host) throws RemoteException, InterruptedException, UnknownHostException, NotBoundException;
 
 }
