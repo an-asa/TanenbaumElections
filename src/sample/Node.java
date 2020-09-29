@@ -1,6 +1,8 @@
 package sample;
 
-public class Node {
+import java.io.Serializable;
+
+public class Node implements Serializable {
     public int priority;
     public String ip;
     public boolean online;
