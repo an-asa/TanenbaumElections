@@ -18,7 +18,7 @@ public class Main implements RMIInterface {
     private static RMIInterface rmi = null;
     private List<String[]> inithosts;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws RemoteException, NotBoundException, UnknownHostException, InterruptedException {
 
         Registry reg = null;
 
@@ -32,12 +32,21 @@ public class Main implements RMIInterface {
         serverObject = new Main();
         System.out.println("RMI server online");
 
+        /*
         try {
             reg.rebind("server", UnicastRemoteObject.exportObject(serverObject, 0));
         } catch (Exception e) {
             System.out.println("ERROR: Failed to register the server object.");
             e.printStackTrace();
         }
+
+        List<String[]> host = new LinkedList<>();
+        host.add(new String[]{Integer.toString(1), "192.168.1.100"});
+
+        Registry registry = LocateRegistry.getRegistry(nextIp, 1099);
+        rmi = (RMIInterface) registry.lookup("server");
+        rmi.sendElect(host);
+        */
     }
 
     @Override
@@ -71,6 +80,7 @@ public class Main implements RMIInterface {
             }
 
             message += "\ndo hosta " + nextIp + "\n";
+            System.out.println(message);
 
             Registry registry = LocateRegistry.getRegistry(nextIp, 1099);
             rmi = (RMIInterface) registry.lookup("server");
@@ -83,6 +93,9 @@ public class Main implements RMIInterface {
 
             List<String[]> newHost = host;
             newHost.add(new String[]{Integer.toString(priority), java.net.InetAddress.getLocalHost().getHostAddress()});
+
+            Registry registry = LocateRegistry.getRegistry(nextIp, 1099);
+            rmi = (RMIInterface) registry.lookup("server");
             rmi.sendElect(newHost);
 
             message += "Wysłano sygnał ELECT o treści: \n\n";
@@ -94,6 +107,7 @@ public class Main implements RMIInterface {
             }
 
             message += "\ndo hosta " + nextIp + "\n";
+            System.out.println(message);
 
         }
     }
@@ -136,6 +150,7 @@ public class Main implements RMIInterface {
             }
 
             message += "\ndo hosta " + nextIp + "\n";
+            System.out.println(message);
 
             Registry registry = LocateRegistry.getRegistry(nextIp, 1099);
             rmi = (RMIInterface) registry.lookup("server");
@@ -145,6 +160,7 @@ public class Main implements RMIInterface {
         else {
 
             message += "\nWszystkie węzły przyjęły wybranego koordynatora: " + coordinatorRecord[0] + "\t" + coordinatorRecord[1] + "\n";
+            System.out.println(message);
 
         }
     }
