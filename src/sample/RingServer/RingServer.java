@@ -71,8 +71,8 @@ public class RingServer implements SignalInterface {
         }
 
         if(selected == 1) {
-            PriorityQueue<Node> host = new PriorityQueue<>(Comparator.comparingInt(a -> a.priority));
-            host.add(new Node(1, java.net.InetAddress.getLocalHost().getHostAddress()));
+            List<Node> host = new LinkedList<Node>();
+            host.add(new Node(currentNode.priority, java.net.InetAddress.getLocalHost().getHostAddress()));
 
             Registry registry = LocateRegistry.getRegistry(nextNode.ip, 1099);
             signalInterface = (SignalInterface) registry.lookup("signalServer");
@@ -98,11 +98,11 @@ public class RingServer implements SignalInterface {
     }
 
     @Override
-    public void sendElect(PriorityQueue<Node> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
+    public void sendElect(List<Node> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
         receiveElect(host);
     }
 
-    public void receiveElect(PriorityQueue<Node> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
+    public void receiveElect(List<Node> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
 
         boolean elected = false;
 
@@ -147,7 +147,7 @@ public class RingServer implements SignalInterface {
 
             message += "\nDodano dane węzła do wiadomości w celu jej dalszego przekazania.\n\n";
 
-            PriorityQueue<Node> newHost = host;
+            List<Node> newHost = host;
             newHost.add(new Node(currentNode.priority, java.net.InetAddress.getLocalHost().getHostAddress()));
 
             message += "Wysłano sygnał ELECT o treści: \n\n";
@@ -169,11 +169,11 @@ public class RingServer implements SignalInterface {
     }
 
     @Override
-    public void sendCoordinator(PriorityQueue<Node> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
+    public void sendCoordinator(List<Node> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
         receiveCoordinator(host);
     }
 
-    public void receiveCoordinator(PriorityQueue<Node> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
+    public void receiveCoordinator(List<Node> host) throws InterruptedException, RemoteException, UnknownHostException, NotBoundException {
 
         Node coordinatorRecord = new Node(0,"");
 
