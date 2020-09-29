@@ -4,11 +4,11 @@ import sample.Node;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.PriorityQueue;
+import java.util.List;
 
 public interface ConfigInterface extends Remote {
 
-    PriorityQueue<Node> getHosts() throws RemoteException;
+    List<Node> getHosts() throws RemoteException;
 
     int getTimeout() throws RemoteException;
 

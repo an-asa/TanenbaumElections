@@ -45,6 +45,7 @@ public class RingServer implements SignalInterface {
         Registry configRegistry = LocateRegistry.getRegistry(configIp, 1098);
         configInterface = (ConfigInterface) configRegistry.lookup("configServer");
 
+        configInterface.getHosts();
         currentNode = findCurrentAndNext(configInterface.getHosts())[0];
         nextNode = findCurrentAndNext(configInterface.getHosts())[1];
         timeout = configInterface.getTimeout();
@@ -79,17 +80,16 @@ public class RingServer implements SignalInterface {
         }
     }
 
-    public static Node[] findCurrentAndNext(PriorityQueue<Node> host) throws UnknownHostException {
+    public static Node[] findCurrentAndNext(List<Node> host) throws UnknownHostException {
         Node currentNode = null;
         Node nextNode = null;
-        List<Node> hostlist = new ArrayList<>(host);
-        for (Node record : hostlist) {
+        for (Node record : host) {
             if (record.ip==java.net.InetAddress.getLocalHost().getHostAddress()){
                 currentNode = new Node(record.priority,record.ip);
-                if(hostlist.indexOf(record) + 1 <= hostlist.size()) {
-                    nextNode = hostlist.get(hostlist.indexOf(record)+1);
+                if(host.indexOf(record) + 1 <= host.size()) {
+                    nextNode = host.get(host.indexOf(record)+1);
                 }else{
-                    nextNode = hostlist.get(0);
+                    nextNode = host.get(0);
                 }
             }
         }

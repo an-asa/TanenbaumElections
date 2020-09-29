@@ -26,7 +26,7 @@ public class ConfigWindowController implements ConfigInterface {
     public TextField timeoutTextField;
     public File chosenfile = null;
     public int timeout = 0;
-    public PriorityQueue<Node> hostlist = new PriorityQueue<Node>(Comparator.comparingInt(a -> a.priority));
+    public PriorityQueue<Node> hostQueue = new PriorityQueue<Node>(Comparator.comparingInt(a -> a.priority));
 
     public void fileChooserButton_onClicked(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
@@ -50,7 +50,7 @@ public class ConfigWindowController implements ConfigInterface {
 
         while (line != null) {
             String[] attributes = line.split(",");
-            hostlist.add(new Node(Integer.parseInt(attributes[0]),attributes[1]));
+            hostQueue.add(new Node(Integer.parseInt(attributes[0]),attributes[1]));
             line = br.readLine();
         }
 
@@ -70,7 +70,7 @@ public class ConfigWindowController implements ConfigInterface {
         System.out.println(java.net.InetAddress.getLocalHost().getHostAddress() + "\n");
         System.out.println("Wczytane węzły:");
         System.out.println("Priorytet\tIP");
-        for (Node record : hostlist) {
+        for (Node record : hostQueue) {
             System.out.println(record.priority + "\t" + record.ip);
         }
         System.out.println("\nCzas oczekiwania węzła: " + timeout + "ms");
@@ -84,8 +84,9 @@ public class ConfigWindowController implements ConfigInterface {
     }
 
     @Override
-    public PriorityQueue<Node> getHosts() throws RemoteException {
-        return hostlist;
+    public List<Node> getHosts() throws RemoteException {
+        List<Node> hostList = new ArrayList<>(hostQueue);
+        return hostList;
     }
 
     @Override
