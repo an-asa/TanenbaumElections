@@ -88,8 +88,12 @@ public class RingServer implements SignalInterface {
         while(coordinatorPriority!=-1)
 
         while (true){
-            Thread.sleep(timeout);
+
+            Thread.sleep(1000);
+
             if(!InetAddress.getByName(nextNode.ip).isReachable(timeout)){
+
+                System.out.println("Wykryto nieresponsywność następnika w pierścieniu");
 
                 if(allhosts.size()==2) System.exit(0);
 
