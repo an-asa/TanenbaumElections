@@ -85,7 +85,7 @@ public class RingServer implements SignalInterface {
 
         launchElection = 0;
 
-        while(coordinatorPriority!=-1)
+        while(coordinatorPriority==-1)
 
         while (true){
 
@@ -93,20 +93,24 @@ public class RingServer implements SignalInterface {
 
             if(!InetAddress.getByName(nextNode.ip).isReachable(timeout)){
 
-                System.out.println("Wykryto nieresponsywność następnika w pierścieniu");
+                System.out.println("Wykryto nieresponsywność następnika w pierścieniu " + nextNode.ip);
 
                 if(allhosts.size()==2) System.exit(0);
 
                 if(nextNode.priority==coordinatorPriority) launchElection = 1;
 
-                if(allhosts.indexOf(currentNode) + 1 == allhosts.size()) {
-                    nextNode = allhosts.get(1);
-                }
-                else if(allhosts.indexOf(currentNode) == allhosts.size()){
-                    nextNode = allhosts.get(0);
-                }
-                else{
-                    nextNode = allhosts.get(allhosts.indexOf(currentNode)+2);
+                for (int i = 0; i < allhosts.size(); i++){
+                    if(allhosts.get(i).ip.equals(currentNode.ip)){
+                        if(i + 1 == allhosts.size()) {
+                            nextNode = allhosts.get(1);
+                        }
+                        else if(i == allhosts.size()){
+                            nextNode = allhosts.get(0);
+                        }
+                        else{
+                            nextNode = allhosts.get(i+2);
+                        }
+                    }
                 }
 
                 if(launchElection==1) {
