@@ -86,7 +86,7 @@ public class RingServer implements SignalInterface {
         for (Node record : host) {
             if (record.ip.equals(InetAddress.getLocalHost().getHostAddress())){
                 currentNode = new Node(record.priority,record.ip);
-                if(host.indexOf(record) + 1 <= host.size()) {
+                if(host.indexOf(record) + 1 < host.size()) {
                     nextNode = host.get(host.indexOf(record)+1);
                 }else{
                     nextNode = host.get(0);
@@ -109,18 +109,12 @@ public class RingServer implements SignalInterface {
         String message = "Otrzymano sygnał ELECT z hostami: \n\n";
         message += "Priorytet\tIP\n";
 
-        System.out.print(message);
-        message="";
-
         for (Node record : host) {
             if (record.priority==currentNode.priority) elected = true;
 
             message += record.priority + "\t" + record.ip + "\n";
 
         }
-
-        System.out.print(message);
-        message="";
 
         if (elected) {
 
@@ -133,10 +127,12 @@ public class RingServer implements SignalInterface {
                 message += record.priority + "\t" + record.ip+ "\n";
             }
 
-            message += "\ndo hosta " + nextNode.ip + "\n";
-            System.out.println(message);
+            message += "\ndo hosta " + nextNode.ip + ".\n";
 
-            Thread.sleep(2000);
+            JOptionPane.showMessageDialog(null,
+                    message,
+                    "Log symulacji",
+                    JOptionPane.PLAIN_MESSAGE);
 
             Registry registry = LocateRegistry.getRegistry(nextNode.ip, 1099);
             signalInterface = (SignalInterface) registry.lookup("signalServer");
@@ -157,10 +153,12 @@ public class RingServer implements SignalInterface {
                 message += record.priority + "\t" + record.ip + "\n";
             }
 
-            message += "\ndo hosta " + nextNode.ip + "\n";
-            System.out.println(message);
+            message += "\ndo hosta " + nextNode.ip + ".\n";
 
-            Thread.sleep(2000);
+            JOptionPane.showMessageDialog(null,
+                    message,
+                    "Log symulacji",
+                    JOptionPane.PLAIN_MESSAGE);
 
             Registry registry = LocateRegistry.getRegistry(nextNode.ip, 1099);
             signalInterface = (SignalInterface) registry.lookup("signalServer");
@@ -206,9 +204,12 @@ public class RingServer implements SignalInterface {
             }
 
             message += "\ndo hosta " + nextNode.ip + "\n";
-            System.out.println(message);
 
-            Thread.sleep(2000);
+            JOptionPane.showMessageDialog(null,
+                    message,
+                    "Log symulacji",
+                    JOptionPane.PLAIN_MESSAGE);
+
             Registry registry = LocateRegistry.getRegistry(nextNode.ip, 1099);
             signalInterface = (SignalInterface) registry.lookup("signalServer");
             signalInterface.sendCoordinator(host);
@@ -217,7 +218,11 @@ public class RingServer implements SignalInterface {
         else {
 
             message += "\nWszystkie węzły przyjęły wybranego koordynatora: " + coordinatorRecord.priority + "\t" + coordinatorRecord.ip + "\n";
-            System.out.println(message);
+
+            JOptionPane.showMessageDialog(null,
+                    message,
+                    "Log symulacji",
+                    JOptionPane.PLAIN_MESSAGE);
 
         }
     }
