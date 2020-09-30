@@ -28,7 +28,7 @@ public class RingServer implements SignalInterface {
     private static Node nextNode;
     private static int timeout;
 
-    private static int coordinatorPriority;
+    private static int coordinatorPriority = -1;
 
     public static void main(String[] args) throws IOException, NotBoundException, InterruptedException {
 
@@ -85,9 +85,15 @@ public class RingServer implements SignalInterface {
 
         launchElection = 0;
 
+        while(coordinatorPriority!=-1)
+
         while (true){
-            Thread.sleep(timeout);
+
+            Thread.sleep(1000);
+
             if(!InetAddress.getByName(nextNode.ip).isReachable(timeout)){
+
+                System.out.println("Wykryto nieresponsywność następnika w pierścieniu");
 
                 if(allhosts.size()==2) System.exit(0);
 
@@ -143,12 +149,12 @@ public class RingServer implements SignalInterface {
         boolean elected = false;
 
         String message = "Otrzymano sygnał ELECT z hostami: \n\n";
-        message += "Priorytet\tIP\n";
+        message += "Priorytet, IP\n";
 
         for (Node record : host) {
             if (record.priority==currentNode.priority) elected = true;
 
-            message += record.priority + "\t" + record.ip + "\n";
+            message += record.priority + ", " + record.ip + "\n";
 
         }
 
@@ -226,7 +232,7 @@ public class RingServer implements SignalInterface {
 
         if (coordinatorRecord.priority != coordinatorPriority) {
 
-            message += "\nZ rekordów wybrano koordynatora: " + coordinatorRecord.priority + "\t" + coordinatorRecord.ip + "\n";
+            message += "\nZ rekordów wybrano koordynatora: " + coordinatorRecord.priority + ", " + coordinatorRecord.ip + "\n";
 
             coordinatorPriority = coordinatorRecord.priority;
 
@@ -253,7 +259,7 @@ public class RingServer implements SignalInterface {
         }
         else {
 
-            message += "\nWszystkie węzły przyjęły wybranego koordynatora: " + coordinatorRecord.priority + "\t" + coordinatorRecord.ip + "\n";
+            message += "\nWszystkie węzły przyjęły wybranego koordynatora: " + coordinatorRecord.priority + ", " + coordinatorRecord.ip + "\n";
 
             JOptionPane.showMessageDialog(null,
                     message,
